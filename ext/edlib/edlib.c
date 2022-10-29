@@ -1,0 +1,92 @@
+#include "ruby.h"
+#include "edlib.h"
+
+VALUE mEdlib;
+VALUE cConfig;
+VALUE cResult;
+
+static void config_free(void *ptr);
+static size_t config_memsize(const void *ptr);
+
+static const rb_data_type_t config_type = {
+    .wrap_struct_name = "Edlib::Config",
+    .function = {
+        .dfree = config_free,
+        .dsize = config_memsize,
+    },
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY,
+};
+
+static VALUE
+config_allocate(VALUE klass)
+{
+  struct EdlibAlignConfig *config;
+  VALUE obj = TypedData_Make_Struct(klass, EdlibAlignConfig,
+                                    &config_type, config);
+  return obj;
+}
+
+static void
+config_free(void *ptr)
+{
+  // EdlibAlignConfig *config = (EdlibAlignConfig *)ptr;
+  // free(config->additionalEqualities);
+  xfree(ptr);
+}
+
+static size_t
+config_memsize(const void *ptr)
+{
+  const EdlibAlignConfig *config = ptr;
+  return sizeof(ptr) + 2 * sizeof(char) * (config->additionalEqualitiesLength);
+}
+
+static VALUE
+config_initialize(int argc, VALUE *argv, VALUE self)
+{
+  struct EdlibAlignConfig *config;
+  TypedData_Get_Struct(self, EdlibAlignConfig, &config_type, config);
+
+  VALUE mode, task, k, additional_equalities, additional_equalities_length;
+  rb_scan_args(argc, argv, "05", &mode, &task, &k, &additional_equalities, &additional_equalities_length);
+
+  if (NIL_P(mode)) {
+    config->mode = EDLIB_MODE_NW;
+  } else {
+    config->mode = NUM2INT(mode);
+  }
+
+  if (NIL_P(task)) {
+    config->task = EDLIB_TASK_PATH;
+  } else {
+    config->task = NUM2INT(task);
+  }
+
+  if (NIL_P(k)) {
+    config->k = 0;
+  } else {
+    config->k = NUM2INT(k);
+  }
+
+  if (NIL_P(additional_equalities)) {
+    config->additionalEqualities = NULL;
+  } else {
+    config->additionalEqualities = (char *)StringValuePtr(additional_equalities);
+  }
+
+  if (NIL_P(additional_equalities_length)) {
+    config->additionalEqualitiesLength = 0;
+  } else {
+    config->additionalEqualitiesLength = NUM2INT(additional_equalities_length);
+  }
+
+  return self;
+};
+
+void Init_edlib(void)
+{
+  mEdlib = rb_define_module("Edlib");
+  cConfig = rb_define_class_under(mEdlib, "Config", rb_cObject);
+  cResult = rb_define_class_under(mEdlib, "Result", rb_cObject);
+  rb_define_method(cConfig, "initialize", config_initialize, 0);
+}

@@ -11,6 +11,9 @@
 /tmp/
 *.lock
 *.swp
+*.so
+*.dylib
+*.dll
 
 # Used by dotenv library to load environment variables.
 # .env

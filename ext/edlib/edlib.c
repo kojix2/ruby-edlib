@@ -2,14 +2,13 @@
 #include "edlib.h"
 
 VALUE mEdlib;
-VALUE cConfig;
-VALUE cResult;
+VALUE cAligner;
 
 static void config_free(void *ptr);
 static size_t config_memsize(const void *ptr);
 
 static const rb_data_type_t config_type = {
-    .wrap_struct_name = "Edlib::Config",
+    .wrap_struct_name = "EdlibAlignConfig",
     .function = {
         .dfree = config_free,
         .dsize = config_memsize,
@@ -42,51 +41,20 @@ config_memsize(const void *ptr)
 }
 
 static VALUE
-config_initialize(int argc, VALUE *argv, VALUE self)
+aligner_init0(VALUE self)
 {
-  struct EdlibAlignConfig *config;
-  TypedData_Get_Struct(self, EdlibAlignConfig, &config_type, config);
-
-  VALUE mode, task, k, additional_equalities, additional_equalities_length;
-  rb_scan_args(argc, argv, "05", &mode, &task, &k, &additional_equalities, &additional_equalities_length);
-
-  if (NIL_P(mode)) {
-    config->mode = EDLIB_MODE_NW;
-  } else {
-    config->mode = NUM2INT(mode);
-  }
-
-  if (NIL_P(task)) {
-    config->task = EDLIB_TASK_PATH;
-  } else {
-    config->task = NUM2INT(task);
-  }
-
-  if (NIL_P(k)) {
-    config->k = 0;
-  } else {
-    config->k = NUM2INT(k);
-  }
-
-  if (NIL_P(additional_equalities)) {
-    config->additionalEqualities = NULL;
-  } else {
-    config->additionalEqualities = (char *)StringValuePtr(additional_equalities);
-  }
-
-  if (NIL_P(additional_equalities_length)) {
-    config->additionalEqualitiesLength = 0;
-  } else {
-    config->additionalEqualitiesLength = NUM2INT(additional_equalities_length);
-  }
-
+  EdlibAlignConfig config = edlibDefaultAlignConfig();
+  DATA_PTR(self) = &config;
   return self;
-};
+}
+
+static VALUE
 
 void Init_edlib(void)
 {
   mEdlib = rb_define_module("Edlib");
-  cConfig = rb_define_class_under(mEdlib, "Config", rb_cObject);
-  cResult = rb_define_class_under(mEdlib, "Result", rb_cObject);
-  rb_define_method(cConfig, "initialize", config_initialize, 0);
+  cAligner = rb_define_class_under(mEdlib, "Aligner", rb_cObject);
+  rb_define_alloc_func(cAligner, config_allocate);
+  rb_define_method(cAligner, "initialize_with_defaults", aligner_init0, 0);
+  rb_deflie_method(cAligner, "align_raw", aligner_align, 4);
 }

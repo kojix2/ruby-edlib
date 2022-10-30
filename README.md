@@ -23,3 +23,11 @@ a.align("AACG", "TCAACCTG")
 ## Development
 
 * Pull requests welcome
+
+```sh
+git clone https://github.com/kojix2/ruby-edlib # Pleas fork before clone
+cd ruby-edlib
+bundle install
+bundle exec rake compile
+bundle exec rake test
+```

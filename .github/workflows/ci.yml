@@ -20,4 +20,5 @@ jobs:
         run: |
           sudo apt update -y
           sudo apt install -yq libedlib-dev
+      - run: bundle exec rake compile
       - run: bundle exec rake test

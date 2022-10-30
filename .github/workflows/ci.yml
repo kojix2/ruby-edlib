@@ -19,6 +19,5 @@ jobs:
         if: ${{ matrix.os == 'ubuntu' }}
         run: |
           sudo apt update -y
-          sudo apt install -yq edlib-dev
-      - run: bundle exec rake compile
+          sudo apt install -yq libedlib-dev
       - run: bundle exec rake test

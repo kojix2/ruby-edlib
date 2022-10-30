@@ -41,6 +41,7 @@ static VALUE
 aligner_initialize(VALUE self, VALUE k, VALUE mode, VALUE task)
 {
 	EdlibAlignConfig *config = get_config(self);
+
 	config->k = NUM2INT(k);
 	config->mode = NUM2INT(mode);
 	config->task = NUM2INT(task);
@@ -51,29 +52,21 @@ aligner_initialize(VALUE self, VALUE k, VALUE mode, VALUE task)
 }
 
 static VALUE
-aligner_config_hash(VALUE self)
+get_k(EdlibAlignConfig *config)
 {
-	EdlibAlignConfig *config = get_config(self);
-	VALUE hash = rb_hash_new();
-	rb_hash_aset(hash, ID2SYM(rb_intern("k")), INT2NUM(config->k));
-	rb_hash_aset(hash, ID2SYM(rb_intern("mode")), INT2NUM(config->mode));
-	rb_hash_aset(hash, ID2SYM(rb_intern("task")), INT2NUM(config->task));
-	// rb_hash_aset(hash, ID2SYM(rb_intern("additionalEqualities")), rb_str_new(config->additionalEqualities, config->additionalEqualitiesLength));
-	rb_hash_aset(hash, ID2SYM(rb_intern("additionalEqualitiesLength")), INT2NUM(config->additionalEqualitiesLength));
-	return hash;
-}
-
-static VALUE
-get_k(VALUE self)
-{
-	const EdlibAlignConfig *config = DATA_PTR(self);
 	return INT2NUM(config->k);
 }
 
 static VALUE
-get_mode(VALUE self)
+aligner_get_k(VALUE self)
 {
-	const EdlibAlignConfig *config = get_config(self);
+	EdlibAlignConfig *config = get_config(self);
+	return get_k(config);
+}
+
+static VALUE
+get_mode(EdlibAlignConfig *config)
+{
 	switch (config->mode)
 	{
 	case 0:
@@ -88,9 +81,15 @@ get_mode(VALUE self)
 }
 
 static VALUE
-get_task(VALUE self)
+aligner_get_mode(VALUE self)
 {
-	const EdlibAlignConfig *config = get_config(self);
+	EdlibAlignConfig *config = get_config(self);
+	return get_mode(config);
+}
+
+static VALUE
+get_task(EdlibAlignConfig *config)
+{
 	switch (config->task)
 	{
 	case 0:
@@ -102,6 +101,52 @@ get_task(VALUE self)
 	default:
 		return Qnil;
 	}
+}
+
+static VALUE
+aligner_get_task(VALUE self)
+{
+	EdlibAlignConfig *config = get_config(self);
+	return get_task(config);
+}
+
+static VALUE
+get_additional_equalities(EdlibAlignConfig *config)
+{
+	VALUE equalities = rb_ary_new();
+
+	for (int i = 0; i < config->additionalEqualitiesLength; i++)
+	{
+		EdlibEqualityPair pair = config->additionalEqualities[i];
+		VALUE pair_ary = rb_ary_new();
+		rb_ary_push(pair_ary, INT2NUM(pair.first));
+		rb_ary_push(pair_ary, INT2NUM(pair.second));
+		rb_ary_push(equalities, pair_ary);
+	}
+
+	return equalities;
+}
+
+static VALUE
+aligner_get_additional_equalities(VALUE self)
+{
+	EdlibAlignConfig *config = get_config(self);
+	return get_additional_equalities(config);
+}
+
+static VALUE
+aligner_config_hash(VALUE self)
+{
+	EdlibAlignConfig *config = get_config(self);
+
+	VALUE hash = rb_hash_new();
+
+	rb_hash_aset(hash, ID2SYM(rb_intern("k")), get_k(config));
+	rb_hash_aset(hash, ID2SYM(rb_intern("mode")), get_mode(config));
+	rb_hash_aset(hash, ID2SYM(rb_intern("task")), get_task(config));
+	rb_hash_aset(hash, ID2SYM(rb_intern("additional_equalities")), get_additional_equalities(config));
+
+	return hash;
 }
 
 static VALUE
@@ -153,9 +198,10 @@ void Init_edlib(void)
 	cAligner = rb_define_class_under(mEdlib, "Aligner", rb_cObject);
 	rb_define_alloc_func(cAligner, config_allocate);
 	rb_define_method(cAligner, "initialize", aligner_initialize, 3);
-	rb_define_method(cAligner, "k", get_k, 0);
-	rb_define_method(cAligner, "mode", get_mode, 0);
-	rb_define_method(cAligner, "task", get_task, 0);
+	rb_define_method(cAligner, "k", aligner_get_k, 0);
+	rb_define_method(cAligner, "mode", aligner_get_mode, 0);
+	rb_define_method(cAligner, "task", aligner_get_task, 0);
+	rb_define_method(cAligner, "additional_equalities", aligner_get_additional_equalities, 0);
 	rb_define_method(cAligner, "config", aligner_config_hash, 0);
 	rb_define_method(cAligner, "align", aligner_align, 2);
 }

@@ -339,6 +339,11 @@ aligner_align(VALUE self, VALUE query, VALUE target)
 		RSTRING_LEN(target),
 		edlibDefaultAlignConfig());
 
+	if (result.status != 0)
+	{
+		rb_raise(rb_eRuntimeError, "edlibAlign failed");
+	}
+
 	VALUE editDistance = INT2NUM(result.editDistance);
 	VALUE numLocations = INT2NUM(result.numLocations);
 	VALUE endLocations = rb_ary_new();

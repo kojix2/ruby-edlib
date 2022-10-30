@@ -19,14 +19,12 @@ a.align("AACG", "TCAACCTG")
 # => {:edit_distance=>1, :alphabet_length=>4, :locations=>[[2, 4], [2, 5]], :alignment=>[0, 0, 0, 1], :cigar=>"3=1I"}
 ```
 
-
-
-|                     ||
-|---------------------|---|
-|k                    ||
-|mode                 ||
-|task                 ||
-|additional_equalities||
+|keyword argument     |description|
+|---------------------|-----------------------------------------------------------------------------|
+|k                    |edit distance is not larger than k [-1]                                             |
+|mode                 |global (NW) , prefix (SHW) , infix (HW) ["NW"]                                      |
+|task                 |DISTANCE, LOC, PATH ["DISTANCE"]                                                    |
+|additional_equalities|List of pairs of characters, where each pair defines two characters as equal. [NULL]|
 
 ## Development
 

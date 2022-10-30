@@ -254,6 +254,8 @@ set_additional_equalities(EdlibAlignConfig *config, VALUE equalities)
 	}
 
 	config->additionalEqualities = pairs;
+	free(pairs);
+
 	config->additionalEqualitiesLength = RARRAY_LEN(equalities);
 
 	return equalities;

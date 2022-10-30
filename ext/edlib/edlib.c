@@ -92,9 +92,14 @@ aligner_get_mode(VALUE self)
 static VALUE
 set_mode(EdlibAlignConfig *config, VALUE mode)
 {
+	if (TYPE(mode) == T_SYMBOL)
+	{
+		mode =  rb_String(mode);
+	}
 	switch (TYPE(mode))
 	{
-	case T_STRING:
+	case T_STRING:;
+		rb_funcall(mode, rb_intern("upcase!"), 0);
 		if (strcmp(RSTRING_PTR(mode), "NW") == 0)
 		{
 			config->mode = 0;
@@ -118,7 +123,7 @@ set_mode(EdlibAlignConfig *config, VALUE mode)
 		{
 			rb_raise(rb_eArgError, "Invalid mode");
 		}
-		config->mode = NUM2INT(mode);
+		config->mode = m;
 		break;
 	default:
 		rb_raise(rb_eArgError, "Invalid mode");
@@ -159,9 +164,14 @@ aligner_get_task(VALUE self)
 static VALUE
 set_task(EdlibAlignConfig *config, VALUE task)
 {
+	if (TYPE(task) == T_SYMBOL)
+	{
+		task = rb_String(task);
+	}
 	switch (TYPE(task))
 	{
-	case T_STRING:
+	case T_STRING:;
+		rb_funcall(task, rb_intern("upcase!"), 0);
 		if (strcmp(RSTRING_PTR(task), "DISTANCE") == 0)
 		{
 			config->task = 0;
@@ -185,7 +195,7 @@ set_task(EdlibAlignConfig *config, VALUE task)
 		{
 			rb_raise(rb_eArgError, "Invalid task");
 		}
-		config->task = NUM2INT(task);
+		config->task = t;
 		break;
 	default:
 		rb_raise(rb_eArgError, "Invalid task");

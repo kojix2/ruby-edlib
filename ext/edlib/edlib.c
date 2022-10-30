@@ -112,7 +112,7 @@ set_mode(EdlibAlignConfig *config, VALUE mode)
 			rb_raise(rb_eArgError, "Invalid mode");
 		}
 		break;
-	case T_FIXNUM:
+	case T_FIXNUM:;
 		int m = NUM2INT(mode);
 		if (m < 0 || m > 2)
 		{
@@ -179,7 +179,7 @@ set_task(EdlibAlignConfig *config, VALUE task)
 			rb_raise(rb_eArgError, "Invalid task");
 		}
 		break;
-	case T_FIXNUM:
+	case T_FIXNUM:;
 		int t = NUM2INT(task);
 		if (t < 0 || t > 2)
 		{

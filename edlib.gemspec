@@ -8,13 +8,13 @@ Gem::Specification.new do |spec|
   spec.authors       = ["kojix2"]
   spec.email         = ["2xijok@gmail.com"]
 
-  spec.summary       = "edlib"
-  spec.description   = "Lightweight, super fast C/C++ (& Python) library for sequence alignment using edit (Levenshtein) distance. "
+  spec.summary       = "ruby-edlib is a wrapper for edlib."
+  spec.description   = "Lightweight, super fast C/C++ library for sequence alignment using edit (Levenshtein) distance. "
   spec.homepage      = "https://github.com/kojix2/ruby-edlib"
   spec.license       = "MIT"
   spec.required_ruby_version = ">= 2.7.0"
 
-  spec.files         = Dir['*.{md,txt}', '{lib,ext}/**/*']
+  spec.files         = Dir['*.{md,txt}', '{lib,ext}/**/*.{c,h,rb}']
   spec.require_paths = ["lib"]
   spec.extensions    = ["ext/edlib/extconf.rb"]
 end

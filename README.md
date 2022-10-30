@@ -9,7 +9,7 @@ sudo apt install edlib-dev
 gem install edlib
 ```
 
-## API Future Plan
+## API
 
 ```ruby
 require "edlib"
@@ -22,3 +22,4 @@ a.align("AACG", "TCAACCTG")
 
 ## Development
 
+* Pull requests welcome

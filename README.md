@@ -1,5 +1,7 @@
 # ruby-edlib
 
+* [Edlib](https://github.com/Martinsos/edlib) - A lightweight and super fast C/C++ library for sequence alignment using edit distance
+
 ## Installation
 
 ```
@@ -13,30 +15,10 @@ gem install edlib
 require "edlib"
 
 # Aligner wraps EdlibAlignConfig
-e = Edlib::Aligner.new
-e = Edlib::Aligner.new(...)
-
-r = e.align(...) # hash
+a = Edlib::Aligner.new(mode: :hw, task: :path)
+a.align("AACG", "TCAACCTG")
+# => {:edit_distance=>1, :alphabet_length=>4, :locations=>[[2, 4], [2, 5]], :alignment=>[0, 0, 0, 1], :cigar=>"3=1I"}
 ```
 
 ## Development
 
-edlib.h api
-
-```
-enum EdlibAlignMode
-enum EdlibAlignTask
-enum EdlibCigarFormat
-
-struct EdlibEqualityPair
-struct EdlibAlignConfig
-
-edlibNewAlignConfig
-edlibDefaultAlignConfig
-
-struct EdlibAlignRsult
-
-edlibFreeAlignResult
-edlibAlign
-edlibAlignmentToCigar
-```

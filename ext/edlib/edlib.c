@@ -4,11 +4,13 @@
 VALUE mEdlib;
 VALUE cAligner;
 
+static size_t config_memsize(const void *ptr);
+
 static const rb_data_type_t config_type = {
 	.wrap_struct_name = "EdlibAlignConfig",
 	.function = {
 		.dfree = RUBY_DEFAULT_FREE,
-		//.dsize = config_memsize,
+		.dsize = config_memsize,
 	},
 	.flags = RUBY_TYPED_FREE_IMMEDIATELY,
 };
@@ -35,20 +37,6 @@ static EdlibAlignConfig *get_config(VALUE self)
 	TypedData_Get_Struct(self, EdlibAlignConfig, &config_type, ptr);
 
 	return ptr;
-}
-
-static VALUE
-aligner_initialize(VALUE self, VALUE k, VALUE mode, VALUE task)
-{
-	EdlibAlignConfig *config = get_config(self);
-
-	config->k = NUM2INT(k);
-	config->mode = NUM2INT(mode);
-	config->task = NUM2INT(task);
-	config->additionalEqualities = NULL;
-	config->additionalEqualitiesLength = 0;
-
-	return self;
 }
 
 static VALUE
@@ -124,24 +112,6 @@ set_mode(EdlibAlignConfig *config, VALUE mode)
 			rb_raise(rb_eArgError, "Invalid mode");
 		}
 		break;
-	case T_SYMBOL:
-		if (SYM2ID(mode) == rb_intern("NW"))
-		{
-			config->mode = 0;
-		}
-		else if (SYM2ID(mode) == rb_intern("SHW"))
-		{
-			config->mode = 1;
-		}
-		else if (SYM2ID(mode) == rb_intern("HW"))
-		{
-			config->mode = 2;
-		}
-		else
-		{
-			rb_raise(rb_eArgError, "Invalid mode");
-		}
-		break;
 	case T_FIXNUM:
 		int m = NUM2INT(mode);
 		if (m < 0 || m > 2)
@@ -187,7 +157,7 @@ aligner_get_task(VALUE self)
 }
 
 static VALUE
-set_track(EdlibAlignConfig *config, VALUE task)
+set_task(EdlibAlignConfig *config, VALUE task)
 {
 	switch (TYPE(task))
 	{
@@ -209,24 +179,6 @@ set_track(EdlibAlignConfig *config, VALUE task)
 			rb_raise(rb_eArgError, "Invalid task");
 		}
 		break;
-	case T_SYMBOL:
-		if (SYM2ID(task) == rb_intern("DISTANCE"))
-		{
-			config->task = 0;
-		}
-		else if (SYM2ID(task) == rb_intern("LOC"))
-		{
-			config->task = 1;
-		}
-		else if (SYM2ID(task) == rb_intern("PATH"))
-		{
-			config->task = 2;
-		}
-		else
-		{
-			rb_raise(rb_eArgError, "Invalid task");
-		}
-		break;
 	case T_FIXNUM:
 		int t = NUM2INT(task);
 		if (t < 0 || t > 2)
@@ -239,6 +191,13 @@ set_track(EdlibAlignConfig *config, VALUE task)
 		rb_raise(rb_eArgError, "Invalid task");
 	}
 	return task;
+}
+
+static VALUE
+aligner_set_task(VALUE self, VALUE task)
+{
+	EdlibAlignConfig *config = get_config(self);
+	return set_task(config, task);
 }
 
 static VALUE
@@ -266,7 +225,7 @@ aligner_get_additional_equalities(VALUE self)
 }
 
 static VALUE
-set_additional_qualities(EdlibAlignConfig *config, VALUE equalities)
+set_additional_equalities(EdlibAlignConfig *config, VALUE equalities)
 {
 	Check_Type(equalities, T_ARRAY);
 	EdlibEqualityPair *pairs = (EdlibEqualityPair *)malloc(sizeof(EdlibEqualityPair) * RARRAY_LEN(equalities));
@@ -304,7 +263,7 @@ static VALUE
 aligner_set_additional_equalities(VALUE self, VALUE equalities)
 {
 	EdlibAlignConfig *config = get_config(self);
-	return set_additional_qualities(config, equalities);
+	return set_additional_equalities(config, equalities);
 }
 
 static VALUE
@@ -320,6 +279,27 @@ aligner_config_hash(VALUE self)
 	rb_hash_aset(hash, ID2SYM(rb_intern("additional_equalities")), get_additional_equalities(config));
 
 	return hash;
+}
+
+static VALUE
+aligner_initialize(VALUE self, VALUE k, VALUE mode, VALUE task, VALUE additional_equalities)
+{
+	EdlibAlignConfig *config = get_config(self);
+
+	config->k = NUM2INT(k);
+	set_mode(config, mode);
+	set_task(config, task);
+	if (additional_equalities != Qnil)
+	{
+		set_additional_equalities(config, additional_equalities);
+	}
+	else
+	{
+		config->additionalEqualities = NULL;
+		config->additionalEqualitiesLength = 0;
+	}
+
+	return self;
 }
 
 static VALUE
@@ -342,16 +322,18 @@ aligner_align(VALUE self, VALUE query, VALUE target)
 		RSTRING_LEN(query),
 		StringValueCStr(target),
 		RSTRING_LEN(target),
-	    cfg);
+		cfg);
 
 	if (result.status != 0)
 	{
 		rb_raise(rb_eRuntimeError, "edlibAlign failed");
 	}
 
-	VALUE editDistance = INT2NUM(result.editDistance);
-	VALUE alignmentLength = INT2NUM(result.alignmentLength);
-	VALUE Locations = rb_ary_new();
+	VALUE edit_distance = INT2NUM(result.editDistance);
+	VALUE alphabet_length = INT2NUM(result.alphabetLength);
+	VALUE locations = rb_ary_new();
+	VALUE alignment = rb_ary_new();
+	VALUE cigar;
 
 	int *el = result.endLocations;
 	int *sl = result.startLocations;
@@ -374,41 +356,27 @@ aligner_align(VALUE self, VALUE query, VALUE target)
 		{
 			rb_ary_push(ary, Qnil);
 		}
-		rb_ary_push(Locations, ary);
+		rb_ary_push(locations, ary);
 	}
-	VALUE alphabetLength = INT2NUM(result.alphabetLength);
+
+	for (int i = 0; i < result.alignmentLength; i++)
+	{
+		rb_ary_push(alignment, UINT2NUM(result.alignment[i]));
+	}
+
+	char *ccigar = edlibAlignmentToCigar(result.alignment, result.alignmentLength, 1); // EDLIB_CIGAR_EXTENDED
+	cigar = rb_str_new2(ccigar);
 
 	VALUE hash = rb_hash_new();
-	rb_hash_aset(hash, ID2SYM(rb_intern("editDistance")), editDistance);
-	rb_hash_aset(hash, ID2SYM(rb_intern("alphabetLength")), alphabetLength);
-	rb_hash_aset(hash, ID2SYM(rb_intern("Locations")), Locations);
-	// rb_hash_aset(hash, ID2SYM(rb_intern("startLocations")), startLocations);
+	rb_hash_aset(hash, ID2SYM(rb_intern("edit_distance")), edit_distance);
+	rb_hash_aset(hash, ID2SYM(rb_intern("alphabet_length")), alphabet_length);
+	rb_hash_aset(hash, ID2SYM(rb_intern("locations")), locations);
+	rb_hash_aset(hash, ID2SYM(rb_intern("alignment")), alignment);
+	rb_hash_aset(hash, ID2SYM(rb_intern("cigar")), cigar);
 
-	VALUE ary = rb_ary_new();
-    for (int i = 0; i < result.alignmentLength; i++)
-	{
-		rb_ary_push(ary, UINT2NUM(result.alignment[i]));
-	}
-	rb_hash_aset(hash, ID2SYM(rb_intern("alignment")), ary);
-
-    char *ccigar = edlibAlignmentToCigar(result.alignment, result.alignmentLength, 1); // EDLIB_CIGAR_EXTENDED
-
-    rb_hash_aset(hash, ID2SYM(rb_intern("cigar")), rb_str_new2(ccigar));
 	edlibFreeAlignResult(result);
 
 	return hash;
-}
-
-static VALUE
-alignment_to_cigar(VALUE self, VALUE alignment, VALUE cigar_format)
-{
-	Check_Type(alignment, T_STRING);
-	int format =NUM2INT(cigar_format);
-	char *cs;
-	cs = edlibAlignmentToCigar(StringValueCStr(alignment), RSTRING_LEN(alignment), format);
-	VALUE cigar = rb_str_new(cs, strlen(cs));
-	free(cs);
-	return cigar;
 }
 
 void Init_edlib(void)
@@ -416,15 +384,15 @@ void Init_edlib(void)
 	mEdlib = rb_define_module("Edlib");
 	cAligner = rb_define_class_under(mEdlib, "Aligner", rb_cObject);
 	rb_define_alloc_func(cAligner, config_allocate);
-	rb_define_method(cAligner, "initialize", aligner_initialize, 3);
+	rb_define_private_method(cAligner, "initialize_raw", aligner_initialize, 4);
 	rb_define_method(cAligner, "k", aligner_get_k, 0);
 	rb_define_method(cAligner, "k=", aligner_set_k, 1);
 	rb_define_method(cAligner, "mode", aligner_get_mode, 0);
 	rb_define_method(cAligner, "mode=", aligner_set_mode, 1);
 	rb_define_method(cAligner, "task", aligner_get_task, 0);
+	rb_define_method(cAligner, "task=", aligner_set_task, 1);
 	rb_define_method(cAligner, "additional_equalities", aligner_get_additional_equalities, 0);
 	rb_define_method(cAligner, "additional_equalities=", aligner_set_additional_equalities, 1);
 	rb_define_method(cAligner, "config", aligner_config_hash, 0);
 	rb_define_method(cAligner, "align", aligner_align, 2);
-	// rb_define_method(cAligner, "to_cigar", alignment_to_cigar, 2);
 }

@@ -365,6 +365,18 @@ aligner_align(VALUE self, VALUE query, VALUE target)
 	return hash;
 }
 
+// static VALUE
+// alignment_to_cigar(VALUE self, VALUE alignment, VALUE cigar_format)
+// {
+// 	Check_Type(alignment, T_STRING);
+// 	int format =NUM2INT(cigar_format);
+// 	char *cs;
+// 	cs = edlibAlignmentToCigar(StringValueCStr(alignment), RSTRING_LEN(alignment), format);
+// 	VALUE cigar = rb_str_new(cs, strlen(cs));
+// 	free(cs);
+// 	return cigar;
+// }
+
 void Init_edlib(void)
 {
 	mEdlib = rb_define_module("Edlib");
@@ -380,4 +392,5 @@ void Init_edlib(void)
 	rb_define_method(cAligner, "additional_equalities=", aligner_set_additional_equalities, 1);
 	rb_define_method(cAligner, "config", aligner_config_hash, 0);
 	rb_define_method(cAligner, "align", aligner_align, 2);
+	// rb_define_method(cAligner, "to_cigar", alignment_to_cigar, 2);
 }

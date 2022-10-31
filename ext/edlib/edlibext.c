@@ -5,11 +5,12 @@ VALUE mEdlib;
 VALUE cAligner;
 
 static size_t config_memsize(const void *ptr);
+static void config_free(void *ptr);
 
 static const rb_data_type_t config_type = {
 	.wrap_struct_name = "EdlibAlignConfig",
 	.function = {
-		.dfree = RUBY_DEFAULT_FREE,
+		.dfree = config_free,
 		.dsize = config_memsize,
 	},
 	.flags = RUBY_TYPED_FREE_IMMEDIATELY,
@@ -24,6 +25,17 @@ config_allocate(VALUE klass)
 	return obj;
 }
 
+static void
+config_free(void *ptr)
+{
+  EdlibAlignConfig *cfg = (EdlibAlignConfig *)ptr;
+  for (int i = 0; i < cfg->additionalEqualitiesLength; i++)
+  {
+  	free(cfg->additionalEqualities[i]);
+  }
+  xfree(ptr);
+}
+
 static size_t
 config_memsize(const void *ptr)
 {
@@ -31,7 +43,8 @@ config_memsize(const void *ptr)
 	return sizeof(ptr) + 2 * sizeof(char) * (config->additionalEqualitiesLength);
 }
 
-static EdlibAlignConfig *get_config(VALUE self)
+static void
+EdlibAlignConfig *get_config(VALUE self)
 {
 	EdlibAlignConfig *ptr = NULL;
 	TypedData_Get_Struct(self, EdlibAlignConfig, &config_type, ptr);
@@ -264,7 +277,7 @@ set_additional_equalities(EdlibAlignConfig *config, VALUE equalities)
 	}
 
 	config->additionalEqualities = pairs;
-	free(pairs);
+	// FIXME: free(pairs);
 
 	config->additionalEqualitiesLength = RARRAY_LEN(equalities);
 

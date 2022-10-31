@@ -58,7 +58,7 @@ class EdlibTest < Test::Unit::TestCase
   def test_additional_equalities
     a = Edlib::Aligner.new
     assert_equal [], a.additional_equalities
-    a.additional_equalities = [%w[A B], %w[C D]]
-    assert_equal [%w[A B], %w[C D]], a.additional_equalities
+    a.additional_equalities = [["A", "B"], ["C", "D"]]
+    assert_equal [["A", "B"], ["C", "D"]], a.additional_equalities
   end
 end

@@ -1,20 +1,21 @@
 # frozen_string_literal: true
 
-require "bundler/gem_tasks"
-require "rake/testtask"
+require 'bundler/gem_tasks'
+require 'rake/testtask'
 
 Rake::TestTask.new(:test) do |t|
-  t.libs << "test"
-  t.libs << "lib"
-  t.test_files = FileList["test/**/*_test.rb"]
+  t.libs << 'test'
+  t.libs << 'lib'
+  t.test_files = FileList['test/**/*_test.rb']
 end
 
-require "rake/extensiontask"
+require 'rake/extensiontask'
 
 task build: :compile
 
-Rake::ExtensionTask.new("edlib") do |ext|
-  ext.lib_dir = "lib/edlib"
+Rake::ExtensionTask.new('edlibext') do |ext|
+  ext.ext_dir = 'ext/edlib'
+  ext.lib_dir = 'lib/edlib'
 end
 
 task default: %i[clobber compile test]

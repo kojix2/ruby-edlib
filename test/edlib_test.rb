@@ -1,4 +1,4 @@
-require_relative "test_helper"
+require_relative 'test_helper'
 
 class EdlibTest < Test::Unit::TestCase
   def test_that_it_has_a_version_number
@@ -14,12 +14,12 @@ class EdlibTest < Test::Unit::TestCase
   end
 
   def test_align
-    assert_instance_of Hash, Edlib::Aligner.new.align("A", "A")
+    assert_instance_of Hash, Edlib::Aligner.new.align('A', 'A')
   end
 
   def test_k
     a = Edlib::Aligner.new
-    assert_equal -1, a.k
+    assert_equal(-1, a.k)
     a.k = 2
     assert_equal 2, a.k
   end

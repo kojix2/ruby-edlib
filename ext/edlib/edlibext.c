@@ -391,7 +391,7 @@ aligner_align(VALUE self, VALUE query, VALUE target)
 	return hash;
 }
 
-void Init_edlib(void)
+void Init_edlibext(void)
 {
 	mEdlib = rb_define_module("Edlib");
 	cAligner = rb_define_class_under(mEdlib, "Aligner", rb_cObject);

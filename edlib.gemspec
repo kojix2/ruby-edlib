@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
   spec.license       = 'MIT'
   spec.required_ruby_version = '>= 2.7.0'
 
-  spec.files         = Dir['*.{md,txt}', '{lib,ext}/**/*.{c,h,rb}']
+  spec.files         = Dir['*.{md,txt}', '{lib,ext}/**/*.{c,cpp,h,rb}']
   spec.require_paths = ['lib']
   spec.extensions    = ['ext/edlib/extconf.rb']
 end

@@ -8,9 +8,10 @@
 ## Installation
 
 ```
-sudo apt install edlib-dev
 gem install edlib
 ```
+
+The Gem compiles the edlib source code inside the gem at installation. If you want to use the latest edlib, see Development.
 
 ## Usage
 
@@ -44,6 +45,17 @@ Pull requests welcome!
 git clone https://github.com/kojix2/ruby-edlib # Please fork repo
 cd ruby-edlib
 bundle install
+bundle exec rake compile
+bundle exec rake test
+```
+
+Use latest edlib
+
+```sh
+git clone https://github.com/kojix2/ruby-edlib
+cd ruby-edlib
+bundle install
+bundle exec rake edlib:update # Download latest edlib.h and edlib.cpp
 bundle exec rake compile
 bundle exec rake test
 ```

@@ -2,6 +2,7 @@
 
 [![Gem Version](https://badge.fury.io/rb/edlib.svg)](https://badge.fury.io/rb/edlib)
 [![test](https://github.com/kojix2/ruby-edlib/actions/workflows/ci.yml/badge.svg)](https://github.com/kojix2/ruby-edlib/actions/workflows/ci.yml)
+[![DOI](https://zenodo.org/badge/559318048.svg)](https://zenodo.org/badge/latestdoi/559318048)
 
 [Edlib](https://github.com/Martinsos/edlib) - A lightweight and super fast C/C++ library for sequence alignment using edit distance
 

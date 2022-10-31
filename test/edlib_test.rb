@@ -60,5 +60,7 @@ class EdlibTest < Test::Unit::TestCase
     assert_equal [], a.additional_equalities
     a.additional_equalities = [["A", "B"], ["C", "D"]]
     assert_equal [["A", "B"], ["C", "D"]], a.additional_equalities
+    a.additional_equalities = []
+    assert_equal [], a.additional_equalities
   end
 end

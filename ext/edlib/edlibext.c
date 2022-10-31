@@ -3,6 +3,7 @@
 
 VALUE mEdlib;
 VALUE cAligner;
+EdlibEqualityPair *eqpairs;
 
 static size_t config_memsize(const void *ptr);
 static void config_free(void *ptr);
@@ -28,12 +29,12 @@ config_allocate(VALUE klass)
 static void
 config_free(void *ptr)
 {
-  EdlibAlignConfig *cfg = (EdlibAlignConfig *)ptr;
-  for (int i = 0; i < cfg->additionalEqualitiesLength; i++)
-  {
-  	free(cfg->additionalEqualities[i]);
-  }
-  xfree(ptr);
+	if (eqpairs != NULL)
+	{
+		free(eqpairs);
+		eqpairs = NULL;
+	}
+	xfree(ptr);
 }
 
 static size_t
@@ -43,8 +44,8 @@ config_memsize(const void *ptr)
 	return sizeof(ptr) + 2 * sizeof(char) * (config->additionalEqualitiesLength);
 }
 
-static void
-EdlibAlignConfig *get_config(VALUE self)
+static EdlibAlignConfig *
+get_config(VALUE self)
 {
 	EdlibAlignConfig *ptr = NULL;
 	TypedData_Get_Struct(self, EdlibAlignConfig, &config_type, ptr);
@@ -107,7 +108,7 @@ set_mode(EdlibAlignConfig *config, VALUE mode)
 {
 	if (TYPE(mode) == T_SYMBOL)
 	{
-		mode =  rb_String(mode);
+		mode = rb_String(mode);
 	}
 	switch (TYPE(mode))
 	{
@@ -251,9 +252,20 @@ static VALUE
 set_additional_equalities(EdlibAlignConfig *config, VALUE equalities)
 {
 	Check_Type(equalities, T_ARRAY);
-	EdlibEqualityPair *pairs = (EdlibEqualityPair *)malloc(sizeof(EdlibEqualityPair) * RARRAY_LEN(equalities));
-
-	for (int i = 0; i < RARRAY_LEN(equalities); i++)
+	int len = RARRAY_LEN(equalities);
+	if (len == 0)
+	{
+		if(eqpairs != NULL) {
+			free(eqpairs);
+			eqpairs = NULL;
+		}
+		config->additionalEqualities = NULL;
+		config->additionalEqualitiesLength = 0;
+		return equalities;
+	}
+	char *first_arr = malloc(len * sizeof(char));
+	char *second_arr = malloc(len * sizeof(char));
+	for (int i = 0; i < len; i++)
 	{
 		VALUE pair = rb_ary_entry(equalities, i);
 		Check_Type(pair, T_ARRAY);
@@ -271,15 +283,28 @@ set_additional_equalities(EdlibAlignConfig *config, VALUE equalities)
 		}
 		char c1 = RSTRING_PTR(s1)[0];
 		char c2 = RSTRING_PTR(s2)[0];
-
-		pairs[i].first = c1;
-		pairs[i].second = c2;
+		first_arr[i] = c1;
+		second_arr[i] = c2;
 	}
 
-	config->additionalEqualities = pairs;
-	// FIXME: free(pairs);
+	if (eqpairs != NULL)
+	{
+		free(eqpairs);
+	}
 
-	config->additionalEqualitiesLength = RARRAY_LEN(equalities);
+	eqpairs = (EdlibEqualityPair *)malloc(sizeof(EdlibEqualityPair) * len);
+
+	for (int i = 0; i < len; i++)
+	{
+		eqpairs[i].first = first_arr[i];
+		eqpairs[i].second = second_arr[i];
+	}
+
+	config->additionalEqualities = eqpairs;
+	config->additionalEqualitiesLength = len;
+
+	free(first_arr);
+	free(second_arr);
 
 	return equalities;
 }

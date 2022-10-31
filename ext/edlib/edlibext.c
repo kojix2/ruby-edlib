@@ -360,19 +360,13 @@ aligner_align(VALUE self, VALUE query, VALUE target)
 	{
 		rb_raise(rb_eRuntimeError, "config is NULL");
 	}
-	EdlibAlignConfig cfg = edlibNewAlignConfig(
-		config->k,
-		config->mode,
-		config->task,
-		config->additionalEqualities,
-		config->additionalEqualitiesLength);
 
 	EdlibAlignResult result = edlibAlign(
 		StringValueCStr(query),
 		RSTRING_LEN(query),
 		StringValueCStr(target),
 		RSTRING_LEN(target),
-		cfg);
+		*config);
 
 	if (result.status != 0)
 	{

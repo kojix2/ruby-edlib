@@ -75,4 +75,22 @@ class EdlibTest < Test::Unit::TestCase
     r = a.align("ACTG", "CACTRT")
     assert_equal 0, r[:edit_distance]
   end
+
+  def test_align_empty_characters
+    a = Edlib::Aligner.new
+    r = a.align("", "elephant")
+    assert_equal 8, r[:edit_distance]
+    r = a.align("telephone", "")
+    assert_equal 9, r[:edit_distance]
+    a.mode = :hw
+    r = a.align("", "elephant")
+    assert_equal 0, r[:edit_distance]
+    r = a.align("telephone", "")
+    assert_equal 9, r[:edit_distance]
+    a.mode = :shw
+    r = a.align("", "elephant")
+    assert_equal 0, r[:edit_distance]
+    r = a.align("telephone", "")
+    assert_equal 9, r[:edit_distance]
+  end
 end

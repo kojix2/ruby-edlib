@@ -63,4 +63,16 @@ class EdlibTest < Test::Unit::TestCase
     a.additional_equalities = []
     assert_equal [], a.additional_equalities
   end
+
+  def test_align_distance
+    a = Edlib::Aligner.new
+    r = a.align("telephone", "elephant")
+    assert_equal 3, r[:edit_distance]
+  end
+
+  def test_align_additional_equalities
+    a = Edlib::Aligner.new(mode: :hw, task: :path, additional_equalities: [%w[R A], %w[R G]])
+    r = a.align("ACTG", "CACTRT")
+    assert_equal 0, r[:edit_distance]
+  end
 end

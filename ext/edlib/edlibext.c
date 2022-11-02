@@ -1,10 +1,29 @@
 #include "ruby.h"
 #include "edlibext.h"
 
+#define ALIGNER_GET_(name) \
+	static VALUE \
+	aligner_get_##name(VALUE self) \
+	{ \
+	    EdlibAlignConfig *config = aligner_get_config(self); \
+		return get_##name(config); \
+	}
+
+#define ALIGNER_SET_(name) \
+	static VALUE \
+	aligner_set_##name(VALUE self, VALUE value) \
+	{ \
+	    EdlibAlignConfig *config = aligner_get_config(self); \
+		return set_##name(config, value); \
+	}
+
 VALUE mEdlib;
 VALUE cAligner;
 
 // Aligner class
+
+static size_t aligner_config_memsize(const void *ptr);
+static void aligner_config_free(void *ptr);
 
 static const rb_data_type_t config_type = {
 	.wrap_struct_name = "RbAlignConfig",
@@ -73,12 +92,7 @@ get_k(EdlibAlignConfig *config)
 	return INT2NUM(config->k);
 }
 
-static VALUE
-aligner_get_k(VALUE self)
-{
-	EdlibAlignConfig *config = aligner_get_config(self);
-	return get_k(config);
-}
+ALIGNER_GET_(k)
 
 static VALUE
 set_k(EdlibAlignConfig *config, VALUE k)
@@ -87,12 +101,7 @@ set_k(EdlibAlignConfig *config, VALUE k)
 	return k;
 }
 
-static VALUE
-aligner_set_k(VALUE self, VALUE k)
-{
-	EdlibAlignConfig *config = aligner_get_config(self);
-	return set_k(config, k);
-}
+ALIGNER_SET_(k)
 
 static VALUE
 get_mode(EdlibAlignConfig *config)
@@ -110,12 +119,7 @@ get_mode(EdlibAlignConfig *config)
 	}
 }
 
-static VALUE
-aligner_get_mode(VALUE self)
-{
-	EdlibAlignConfig *config = aligner_get_config(self);
-	return get_mode(config);
-}
+ALIGNER_GET_(mode)
 
 static VALUE
 set_mode(EdlibAlignConfig *config, VALUE mode)
@@ -159,12 +163,7 @@ set_mode(EdlibAlignConfig *config, VALUE mode)
 	return mode;
 }
 
-static VALUE
-aligner_set_mode(VALUE self, VALUE mode)
-{
-	EdlibAlignConfig *config = aligner_get_config(self);
-	return set_mode(config, mode);
-}
+ALIGNER_SET_(mode)
 
 static VALUE
 get_task(EdlibAlignConfig *config)
@@ -182,12 +181,7 @@ get_task(EdlibAlignConfig *config)
 	}
 }
 
-static VALUE
-aligner_get_task(VALUE self)
-{
-	EdlibAlignConfig *config = aligner_get_config(self);
-	return get_task(config);
-}
+ALIGNER_GET_(task)
 
 static VALUE
 set_task(EdlibAlignConfig *config, VALUE task)
@@ -231,12 +225,7 @@ set_task(EdlibAlignConfig *config, VALUE task)
 	return task;
 }
 
-static VALUE
-aligner_set_task(VALUE self, VALUE task)
-{
-	EdlibAlignConfig *config = aligner_get_config(self);
-	return set_task(config, task);
-}
+ALIGNER_SET_(task)
 
 static VALUE
 get_additional_equalities(EdlibAlignConfig *config)
@@ -255,12 +244,7 @@ get_additional_equalities(EdlibAlignConfig *config)
 	return equalities;
 }
 
-static VALUE
-aligner_get_additional_equalities(VALUE self)
-{
-	EdlibAlignConfig *config = aligner_get_config(self);
-	return get_additional_equalities(config);
-}
+ALIGNER_GET_(additional_equalities)
 
 static VALUE
 set_additional_equalities(EdlibAlignConfig *config, EdlibEqualityPair *eqpairs, VALUE equalities)

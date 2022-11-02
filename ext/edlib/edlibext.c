@@ -20,8 +20,7 @@ aligner_config_allocate(VALUE klass)
 {
 	RbAlignConfig *aligner_config;
 
-	VALUE obj = TypedData_Make_Struct(klass, RbAlignConfig,
-									  &config_type, aligner_config);
+	VALUE obj = TypedData_Make_Struct(klass, RbAlignConfig, &config_type, aligner_config);
 	aligner_config->config = (EdlibAlignConfig *)malloc(sizeof(EdlibAlignConfig));
 	aligner_config->equalityPairs = NULL;
 	return obj;
@@ -31,7 +30,8 @@ static void
 aligner_config_free(void *ptr)
 {
 	RbAlignConfig *aligner_config = ptr;
-	if (aligner_config->config != NULL) {
+	if (aligner_config->config != NULL)
+	{
 		free(aligner_config->config);
 	}
 	if (aligner_config->equalityPairs != NULL)
@@ -46,8 +46,7 @@ static size_t
 aligner_config_memsize(const void *ptr)
 {
 	const RbAlignConfig *aligner_config = ptr;
-	return sizeof(ptr) + sizeof(aligner_config->config) +
-	 2 * sizeof(char) * aligner_config->config->additionalEqualitiesLength;
+	return sizeof(ptr) + sizeof(aligner_config->config) + 2 * sizeof(char) * aligner_config->config->additionalEqualitiesLength;
 }
 
 static EdlibAlignConfig *
@@ -353,11 +352,10 @@ aligner_initialize_raw(VALUE self, VALUE k, VALUE mode, VALUE task, VALUE additi
 {
 	EdlibAlignConfig *config = aligner_get_config(self);
 	EdlibEqualityPair *eqpairs = aligner_get_equalityPairs(self);
-	
 	config->k = NUM2INT(k);
- 
 	set_mode(config, mode);
 	set_task(config, task);
+	
 	if (additional_equalities != Qnil)
 	{
 		set_additional_equalities(config, eqpairs, additional_equalities);

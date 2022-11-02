@@ -1,57 +1,72 @@
 #include "ruby.h"
-#include "edlib.h"
+#include "edlibext.h"
 
 VALUE mEdlib;
 VALUE cAligner;
-EdlibEqualityPair *eqpairs;
 
-static size_t config_memsize(const void *ptr);
-static void config_free(void *ptr);
+// Aligner class
 
 static const rb_data_type_t config_type = {
-	.wrap_struct_name = "EdlibAlignConfig",
+	.wrap_struct_name = "RbAlignConfig",
 	.function = {
-		.dfree = config_free,
-		.dsize = config_memsize,
+		.dfree = aligner_config_free,
+		.dsize = aligner_config_memsize,
 	},
 	.flags = RUBY_TYPED_FREE_IMMEDIATELY,
 };
 
 static VALUE
-config_allocate(VALUE klass)
+aligner_config_allocate(VALUE klass)
 {
-	EdlibAlignConfig *config;
-	VALUE obj = TypedData_Make_Struct(klass, EdlibAlignConfig,
-									  &config_type, config);
+	RbAlignConfig *aligner_config;
+
+	VALUE obj = TypedData_Make_Struct(klass, RbAlignConfig,
+									  &config_type, aligner_config);
+	aligner_config->config = (EdlibAlignConfig *)malloc(sizeof(EdlibAlignConfig));
+	aligner_config->equalityPairs = NULL;
 	return obj;
 }
 
 static void
-config_free(void *ptr)
+aligner_config_free(void *ptr)
 {
-	if (eqpairs != NULL)
-	{
-		free(eqpairs);
-		eqpairs = NULL;
+	RbAlignConfig *aligner_config = ptr;
+	if (aligner_config->config != NULL) {
+		free(aligner_config->config);
 	}
-	xfree(ptr);
+	if (aligner_config->equalityPairs != NULL)
+	{
+		free(aligner_config->equalityPairs);
+	}
+
+	free(ptr);
 }
 
 static size_t
-config_memsize(const void *ptr)
+aligner_config_memsize(const void *ptr)
 {
-	const EdlibAlignConfig *config = ptr;
-	return sizeof(ptr) + 2 * sizeof(char) * (config->additionalEqualitiesLength);
+	const RbAlignConfig *aligner_config = ptr;
+	return sizeof(ptr) + sizeof(aligner_config->config) +
+	 2 * sizeof(char) * aligner_config->config->additionalEqualitiesLength;
 }
 
 static EdlibAlignConfig *
-get_config(VALUE self)
+aligner_get_config(VALUE self)
 {
-	EdlibAlignConfig *ptr = NULL;
-	TypedData_Get_Struct(self, EdlibAlignConfig, &config_type, ptr);
-
-	return ptr;
+	RbAlignConfig *aligner_config = NULL;
+	TypedData_Get_Struct(self, RbAlignConfig, &config_type, aligner_config);
+	return aligner_config->config;
 }
+
+static EdlibEqualityPair *
+aligner_get_equalityPairs(VALUE self)
+{
+	RbAlignConfig *aligner_config = NULL;
+	TypedData_Get_Struct(self, RbAlignConfig, &config_type, aligner_config);
+	return aligner_config->equalityPairs;
+}
+
+// Config
 
 static VALUE
 get_k(EdlibAlignConfig *config)
@@ -62,7 +77,7 @@ get_k(EdlibAlignConfig *config)
 static VALUE
 aligner_get_k(VALUE self)
 {
-	EdlibAlignConfig *config = get_config(self);
+	EdlibAlignConfig *config = aligner_get_config(self);
 	return get_k(config);
 }
 
@@ -76,7 +91,7 @@ set_k(EdlibAlignConfig *config, VALUE k)
 static VALUE
 aligner_set_k(VALUE self, VALUE k)
 {
-	EdlibAlignConfig *config = get_config(self);
+	EdlibAlignConfig *config = aligner_get_config(self);
 	return set_k(config, k);
 }
 
@@ -99,7 +114,7 @@ get_mode(EdlibAlignConfig *config)
 static VALUE
 aligner_get_mode(VALUE self)
 {
-	EdlibAlignConfig *config = get_config(self);
+	EdlibAlignConfig *config = aligner_get_config(self);
 	return get_mode(config);
 }
 
@@ -148,7 +163,7 @@ set_mode(EdlibAlignConfig *config, VALUE mode)
 static VALUE
 aligner_set_mode(VALUE self, VALUE mode)
 {
-	EdlibAlignConfig *config = get_config(self);
+	EdlibAlignConfig *config = aligner_get_config(self);
 	return set_mode(config, mode);
 }
 
@@ -171,7 +186,7 @@ get_task(EdlibAlignConfig *config)
 static VALUE
 aligner_get_task(VALUE self)
 {
-	EdlibAlignConfig *config = get_config(self);
+	EdlibAlignConfig *config = aligner_get_config(self);
 	return get_task(config);
 }
 
@@ -220,7 +235,7 @@ set_task(EdlibAlignConfig *config, VALUE task)
 static VALUE
 aligner_set_task(VALUE self, VALUE task)
 {
-	EdlibAlignConfig *config = get_config(self);
+	EdlibAlignConfig *config = aligner_get_config(self);
 	return set_task(config, task);
 }
 
@@ -244,18 +259,19 @@ get_additional_equalities(EdlibAlignConfig *config)
 static VALUE
 aligner_get_additional_equalities(VALUE self)
 {
-	EdlibAlignConfig *config = get_config(self);
+	EdlibAlignConfig *config = aligner_get_config(self);
 	return get_additional_equalities(config);
 }
 
 static VALUE
-set_additional_equalities(EdlibAlignConfig *config, VALUE equalities)
+set_additional_equalities(EdlibAlignConfig *config, EdlibEqualityPair *eqpairs, VALUE equalities)
 {
 	Check_Type(equalities, T_ARRAY);
 	int len = RARRAY_LEN(equalities);
 	if (len == 0)
 	{
-		if(eqpairs != NULL) {
+		if (eqpairs != NULL)
+		{
 			free(eqpairs);
 			eqpairs = NULL;
 		}
@@ -312,14 +328,15 @@ set_additional_equalities(EdlibAlignConfig *config, VALUE equalities)
 static VALUE
 aligner_set_additional_equalities(VALUE self, VALUE equalities)
 {
-	EdlibAlignConfig *config = get_config(self);
-	return set_additional_equalities(config, equalities);
+	EdlibAlignConfig *config = aligner_get_config(self);
+	EdlibEqualityPair *eqpairs = aligner_get_equalityPairs(self);
+	return set_additional_equalities(config, eqpairs, equalities);
 }
 
 static VALUE
 aligner_config_hash(VALUE self)
 {
-	EdlibAlignConfig *config = get_config(self);
+	EdlibAlignConfig *config = aligner_get_config(self);
 
 	VALUE hash = rb_hash_new();
 
@@ -332,16 +349,18 @@ aligner_config_hash(VALUE self)
 }
 
 static VALUE
-aligner_initialize(VALUE self, VALUE k, VALUE mode, VALUE task, VALUE additional_equalities)
+aligner_initialize_raw(VALUE self, VALUE k, VALUE mode, VALUE task, VALUE additional_equalities)
 {
-	EdlibAlignConfig *config = get_config(self);
-
+	EdlibAlignConfig *config = aligner_get_config(self);
+	EdlibEqualityPair *eqpairs = aligner_get_equalityPairs(self);
+	
 	config->k = NUM2INT(k);
+ 
 	set_mode(config, mode);
 	set_task(config, task);
 	if (additional_equalities != Qnil)
 	{
-		set_additional_equalities(config, additional_equalities);
+		set_additional_equalities(config, eqpairs, additional_equalities);
 	}
 	else
 	{
@@ -355,7 +374,7 @@ aligner_initialize(VALUE self, VALUE k, VALUE mode, VALUE task, VALUE additional
 static VALUE
 aligner_align(VALUE self, VALUE query, VALUE target)
 {
-	EdlibAlignConfig *config = get_config(self);
+	EdlibAlignConfig *config = aligner_get_config(self);
 	if (!config)
 	{
 		rb_raise(rb_eRuntimeError, "config is NULL");
@@ -427,8 +446,8 @@ void Init_edlibext(void)
 {
 	mEdlib = rb_define_module("Edlib");
 	cAligner = rb_define_class_under(mEdlib, "Aligner", rb_cObject);
-	rb_define_alloc_func(cAligner, config_allocate);
-	rb_define_private_method(cAligner, "initialize_raw", aligner_initialize, 4);
+	rb_define_alloc_func(cAligner, aligner_config_allocate);
+	rb_define_private_method(cAligner, "initialize_raw", aligner_initialize_raw, 4);
 	rb_define_method(cAligner, "k", aligner_get_k, 0);
 	rb_define_method(cAligner, "k=", aligner_set_k, 1);
 	rb_define_method(cAligner, "mode", aligner_get_mode, 0);

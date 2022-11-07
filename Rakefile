@@ -7,8 +7,8 @@ namespace :edlib do
   task :update do
     require 'open-uri'
     base_url = 'https://raw.githubusercontent.com/Martinsos/edlib/master/'
-    url_edlib_h = URI(base_url + 'edlib/include/edlib.h')
-    url_edlib_cpp = URI(base_url + 'edlib/src/edlib.cpp')
+    url_edlib_h = URI("#{base_url}edlib/include/edlib.h")
+    url_edlib_cpp = URI("#{base_url}edlib/src/edlib.cpp")
     url_
     outdir = 'ext/edlib'
     URI.open(url_edlib_h) do |file|

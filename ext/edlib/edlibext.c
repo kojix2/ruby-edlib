@@ -131,16 +131,17 @@ set_mode(EdlibAlignConfig *config, VALUE mode)
 	switch (TYPE(mode))
 	{
 	case T_STRING:;
-		rb_funcall(mode, rb_intern("upcase!"), 0);
-		if (strcmp(RSTRING_PTR(mode), "NW") == 0)
+	    VALUE mode_str = rb_funcall(mode, rb_intern("upcase"), 0);
+	    char *mode_s = RSTRING_PTR(mode_str);
+		if (strcmp(mode_s, "NW") == 0)
 		{
 			config->mode = EDLIB_MODE_NW;
 		}
-		else if (strcmp(RSTRING_PTR(mode), "SHW") == 0)
+		else if (strcmp(mode_s, "SHW") == 0)
 		{
 			config->mode = EDLIB_MODE_SHW;
 		}
-		else if (strcmp(RSTRING_PTR(mode), "HW") == 0)
+		else if (strcmp(mode_s, "HW") == 0)
 		{
 			config->mode = EDLIB_MODE_HW;
 		}
@@ -193,16 +194,17 @@ set_task(EdlibAlignConfig *config, VALUE task)
 	switch (TYPE(task))
 	{
 	case T_STRING:;
-		rb_funcall(task, rb_intern("upcase!"), 0);
-		if (strcmp(RSTRING_PTR(task), "DISTANCE") == 0)
+		VALUE task_str = rb_funcall(task, rb_intern("upcase"), 0);
+		char *task_s = RSTRING_PTR(task_str);
+		if (strcmp(task_s, "DISTANCE") == 0)
 		{
 			config->task = EDLIB_TASK_DISTANCE;
 		}
-		else if (strcmp(RSTRING_PTR(task), "LOC") == 0)
+		else if (strcmp(task_s, "LOC") == 0)
 		{
 			config->task = EDLIB_TASK_LOC;
 		}
-		else if (strcmp(RSTRING_PTR(task), "PATH") == 0)
+		else if (strcmp(task_s, "PATH") == 0)
 		{
 			config->task = EDLIB_TASK_PATH;
 		}

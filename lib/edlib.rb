@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'edlib/edlibext'
 
 module Edlib
@@ -26,13 +28,13 @@ module Edlib
     end
 
     def nice(result, query, target, gap_symbol: '-')
-      raise 'result does not have :locations and :cigar' unless result.key? :locations and result.key? :cigar
+      raise 'result does not have :locations and :cigar' unless result.key?(:locations) && result.key?(:cigar)
 
       target_pos = result[:locations][0][0]
       query_pos = 0
-      query_aln = ''
-      match_aln = ''
-      target_aln = ''
+      query_aln = String.new
+      match_aln = String.new
+      target_aln = String.new
       cigar = result[:cigar]
       cigar.scan(/(\d+)(\D)/).each do |num, op|
         num = num.to_i

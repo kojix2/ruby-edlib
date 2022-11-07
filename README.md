@@ -38,6 +38,22 @@ a.align("AACG", "TCAACCTG")
 |task                 |DISTANCE, LOC, PATH ["DISTANCE"]                                                    |
 |additional_equalities|List of pairs of characters, where each pair defines two characters as equal. [NULL]|
 
+
+```ruby
+a.align("AACG", "TCAACCTG", nice: true)
+
+# {
+#   :edit_distance=>1,                                                 
+#   :alphabet_length=>4,                                               
+#   :locations=>[[2, 4], [2, 5]],                                      
+#   :alignment=>[0, 0, 0, 1],                                          
+#   :cigar=>"3=1I",                                                    
+#   :query_aligned=>"AACG",                                            
+#   :match_aligned=>"|||-",                                            
+#   :target_aligned=>"AAC-"
+# }        
+```
+
 ## Development
 
 Pull requests welcome!

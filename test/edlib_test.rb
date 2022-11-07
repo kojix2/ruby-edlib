@@ -13,8 +13,8 @@ class EdlibTest < Test::Unit::TestCase
     assert_instance_of Hash, Edlib::Aligner.new.config
   end
 
-  def test_align
-    assert_instance_of Hash, Edlib::Aligner.new.align('A', 'A')
+  def test_align_a
+    assert_instance_of Hash, Edlib::Aligner.new.align('a', 'a')
   end
 
   def test_k

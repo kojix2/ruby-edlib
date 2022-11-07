@@ -63,4 +63,40 @@ class EdlibTest < Test::Unit::TestCase
     a.additional_equalities = []
     assert_equal [], a.additional_equalities
   end
+
+  def test_align
+    a = Edlib::Aligner.new
+    r = a.align('telephone', 'elephant')
+    assert_equal 3, r[:edit_distance]
+  end
+
+  def test_align_additional_equalities
+    a = Edlib::Aligner.new(mode: :hw, additional_equalities: [%w[R A], %w[R G]])
+    r = a.align('ACTG', 'CACTRT')
+    assert_equal 0, r[:edit_distance]
+  end
+
+  def test_align_nice_nw
+    a = Edlib::Aligner.new(mode: :nw, task: :path)
+    r = a.align('TAAGGATGGTCCCATTC', 'AAGGGGTCTCATATC', nice: true)
+    assert_equal 'TAAGGATGGTCCCAT-TC', r[:query_aligned]
+    assert_equal '-||||--||||.|||-||', r[:match_aligned]
+    assert_equal '-AAGG--GGTCTCATATC', r[:target_aligned]
+  end
+
+  def test_align_nice_hw
+    a = Edlib::Aligner.new(mode: :hw, task: :path)
+    r = a.align('TAAGGATGGTCCCATTC', 'AAGGGGTCTCATATC', nice: true)
+    assert_equal 'TAAGGATGGTCCCAT-TC', r[:query_aligned]
+    assert_equal '-||||--||||.|||-||', r[:match_aligned]
+    assert_equal '-AAGG--GGTCTCATATC', r[:target_aligned]
+  end
+
+  def test_align_nice_shw
+    a = Edlib::Aligner.new(mode: :shw, task: :path)
+    r = a.align('TAAGGATGGTCCCATTC', 'AAGGGGTCTCATATC', nice: true)
+    assert_equal 'TAAGGATGGTCCCAT-TC', r[:query_aligned]
+    assert_equal '-||||--||||.|||-||', r[:match_aligned]
+    assert_equal '-AAGG--GGTCTCATATC', r[:target_aligned]
+  end
 end

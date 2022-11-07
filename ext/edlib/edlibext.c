@@ -439,5 +439,5 @@ void Init_edlibext(void)
 	rb_define_method(cAligner, "additional_equalities", aligner_get_additional_equalities, 0);
 	rb_define_method(cAligner, "additional_equalities=", aligner_set_additional_equalities, 1);
 	rb_define_method(cAligner, "config", aligner_config_hash, 0);
-	rb_define_method(cAligner, "align", aligner_align, 2);
+	rb_define_method(cAligner, "align_raw", aligner_align, 2);
 }

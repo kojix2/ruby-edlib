@@ -54,6 +54,10 @@ a.align("AACG", "TCAACCTG", nice: true)
 # }        
 ```
 
+## Documentation
+
+https://kojix2.github.io/ruby-edlib/
+
 ## Development
 
 Pull requests welcome!

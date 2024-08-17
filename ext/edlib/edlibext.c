@@ -252,7 +252,7 @@ static VALUE
 set_additional_equalities(EdlibAlignConfig *config, EdlibEqualityPair *eqpairs, VALUE equalities)
 {
 	Check_Type(equalities, T_ARRAY);
-	int len = RARRAY_LEN(equalities);
+	size_t len = RARRAY_LEN(equalities);
 	if (len == 0)
 	{
 		if (eqpairs != NULL)
@@ -264,9 +264,25 @@ set_additional_equalities(EdlibAlignConfig *config, EdlibEqualityPair *eqpairs, 
 		config->additionalEqualitiesLength = 0;
 		return equalities;
 	}
+
+	// Check if len is too large
+	if (len > SIZE_MAX / sizeof(EdlibEqualityPair))
+	{
+		rb_raise(rb_eArgError, "Requested array is too large");
+	}
+
 	char *first_arr = malloc(len * sizeof(char));
 	char *second_arr = malloc(len * sizeof(char));
-	for (int i = 0; i < len; i++)
+	if (first_arr == NULL || second_arr == NULL)
+	{
+		if (first_arr != NULL)
+			free(first_arr);
+		if (second_arr != NULL)
+			free(second_arr);
+		rb_raise(rb_eNoMemError, "Failed to allocate memory for equality pairs");
+	}
+
+	for (size_t i = 0; i < len; i++)
 	{
 		VALUE pair = rb_ary_entry(equalities, i);
 		Check_Type(pair, T_ARRAY);
@@ -295,7 +311,7 @@ set_additional_equalities(EdlibAlignConfig *config, EdlibEqualityPair *eqpairs, 
 
 	eqpairs = (EdlibEqualityPair *)malloc(sizeof(EdlibEqualityPair) * len);
 
-	for (int i = 0; i < len; i++)
+	for (size_t i = 0; i < len; i++)
 	{
 		eqpairs[i].first = first_arr[i];
 		eqpairs[i].second = second_arr[i];

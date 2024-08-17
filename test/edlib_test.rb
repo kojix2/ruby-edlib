@@ -7,7 +7,7 @@ class EdlibTest < Test::Unit::TestCase
     refute_nil ::Edlib::VERSION
   end
 
-  def test_initilize
+  def test_initialize
     assert_instance_of Edlib::Aligner, Edlib::Aligner.new
   end
 

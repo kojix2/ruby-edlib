@@ -473,16 +473,16 @@
       <pre class="lines">
 
 
-313
-314
-315
-316
-317
-318
-319</pre>
+329
+330
+331
+332
+333
+334
+335</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'ext/edlib/edlibext.c', line 313</span>
+      <pre class="code"><span class="info file"># File 'ext/edlib/edlibext.c', line 329</span>
 
 static VALUE
 aligner_set_additional_equalities(VALUE self, VALUE equalities)
@@ -549,22 +549,6 @@ aligner_set_additional_equalities(VALUE self, VALUE equalities)
       <pre class="lines">
 
 
-358
-359
-360
-361
-362
-363
-364
-365
-366
-367
-368
-369
-370
-371
-372
-373
 374
 375
 376
@@ -618,10 +602,26 @@ aligner_set_additional_equalities(VALUE self, VALUE equalities)
 424
 425
 426
-427</pre>
+427
+428
+429
+430
+431
+432
+433
+434
+435
+436
+437
+438
+439
+440
+441
+442
+443</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'ext/edlib/edlibext.c', line 358</span>
+      <pre class="code"><span class="info file"># File 'ext/edlib/edlibext.c', line 374</span>
 
 static VALUE
 aligner_align(VALUE self, VALUE query, VALUE target)
@@ -633,11 +633,11 @@ aligner_align(VALUE self, VALUE query, VALUE target)
 	}
 
 	EdlibAlignResult result = edlibAlign(
-		StringValueCStr(query),
-		RSTRING_LEN(query),
-		StringValueCStr(target),
-		RSTRING_LEN(target),
-		*config);
+			StringValueCStr(query),
+			RSTRING_LEN(query),
+			StringValueCStr(target),
+			RSTRING_LEN(target),
+			*config);
 
 	if (result.status != 0)
 	{
@@ -713,23 +713,23 @@ aligner_align(VALUE self, VALUE query, VALUE target)
       <pre class="lines">
 
 
-321
-322
-323
-324
-325
-326
-327
-328
-329
-330
-331
-332
-333
-334</pre>
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'ext/edlib/edlibext.c', line 321</span>
+      <pre class="code"><span class="info file"># File 'ext/edlib/edlibext.c', line 337</span>
 
 static VALUE
 aligner_config_hash(VALUE self)
@@ -827,7 +827,7 @@ aligner_config_hash(VALUE self)
 </div>
 
       <div id="footer">
-  Generated on Sat Aug 17 04:51:30 2024 by
+  Generated on Sat Aug 17 05:09:13 2024 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.36 (ruby-3.3.4).
 </div>

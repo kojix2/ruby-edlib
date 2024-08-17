@@ -16,10 +16,5 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
-      - name: Install edlib (ubuntu)
-        if: ${{ matrix.os == 'ubuntu' }}
-        run: |
-          sudo apt update -y
-          sudo apt install -yq libedlib-dev
       - run: bundle exec rake compile
       - run: bundle exec rake test

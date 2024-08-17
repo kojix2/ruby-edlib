@@ -1,20 +1,20 @@
 #include "ruby.h"
 #include "edlibext.h"
 
-#define ALIGNER_GET_(name) \
-	static VALUE \
-	aligner_get_##name(VALUE self) \
-	{ \
-	    EdlibAlignConfig *config = aligner_get_config(self); \
-		return get_##name(config); \
+#define ALIGNER_GET_(name)                               \
+	static VALUE                                           \
+			aligner_get_##name(VALUE self)                     \
+	{                                                      \
+		EdlibAlignConfig *config = aligner_get_config(self); \
+		return get_##name(config);                           \
 	}
 
-#define ALIGNER_SET_(name) \
-	static VALUE \
-	aligner_set_##name(VALUE self, VALUE value) \
-	{ \
-	    EdlibAlignConfig *config = aligner_get_config(self); \
-		return set_##name(config, value); \
+#define ALIGNER_SET_(name)                               \
+	static VALUE                                           \
+			aligner_set_##name(VALUE self, VALUE value)        \
+	{                                                      \
+		EdlibAlignConfig *config = aligner_get_config(self); \
+		return set_##name(config, value);                    \
 	}
 
 VALUE mEdlib;
@@ -26,12 +26,12 @@ static size_t aligner_config_memsize(const void *ptr);
 static void aligner_config_free(void *ptr);
 
 static const rb_data_type_t config_type = {
-	.wrap_struct_name = "RbAlignConfig",
-	.function = {
-		.dfree = aligner_config_free,
-		.dsize = aligner_config_memsize,
-	},
-	.flags = RUBY_TYPED_FREE_IMMEDIATELY,
+		.wrap_struct_name = "RbAlignConfig",
+		.function = {
+				.dfree = aligner_config_free,
+				.dsize = aligner_config_memsize,
+		},
+		.flags = RUBY_TYPED_FREE_IMMEDIATELY,
 };
 
 static VALUE
@@ -131,8 +131,8 @@ set_mode(EdlibAlignConfig *config, VALUE mode)
 	switch (TYPE(mode))
 	{
 	case T_STRING:;
-	    VALUE mode_str = rb_funcall(mode, rb_intern("upcase"), 0);
-	    char *mode_s = RSTRING_PTR(mode_str);
+		VALUE mode_str = rb_funcall(mode, rb_intern("upcase"), 0);
+		char *mode_s = RSTRING_PTR(mode_str);
 		if (strcmp(mode_s, "NW") == 0)
 		{
 			config->mode = EDLIB_MODE_NW;
@@ -357,7 +357,7 @@ aligner_initialize_raw(VALUE self, VALUE k, VALUE mode, VALUE task, VALUE additi
 	config->k = NUM2INT(k);
 	set_mode(config, mode);
 	set_task(config, task);
-	
+
 	if (additional_equalities != Qnil)
 	{
 		set_additional_equalities(config, eqpairs, additional_equalities);
@@ -381,11 +381,11 @@ aligner_align(VALUE self, VALUE query, VALUE target)
 	}
 
 	EdlibAlignResult result = edlibAlign(
-		StringValueCStr(query),
-		RSTRING_LEN(query),
-		StringValueCStr(target),
-		RSTRING_LEN(target),
-		*config);
+			StringValueCStr(query),
+			RSTRING_LEN(query),
+			StringValueCStr(target),
+			RSTRING_LEN(target),
+			*config);
 
 	if (result.status != 0)
 	{

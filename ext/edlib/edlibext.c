@@ -429,6 +429,7 @@ aligner_align(VALUE self, VALUE query, VALUE target)
 
 	char *ccigar = edlibAlignmentToCigar(result.alignment, result.alignmentLength, 1); // EDLIB_CIGAR_EXTENDED
 	cigar = rb_str_new2(ccigar);
+	free(ccigar);
 
 	VALUE hash = rb_hash_new();
 	rb_hash_aset(hash, ID2SYM(rb_intern("edit_distance")), edit_distance);

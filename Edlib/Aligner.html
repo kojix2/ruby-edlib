@@ -6,7 +6,7 @@
 <title>
   Class: Edlib::Aligner
   
-    &mdash; Documentation by YARD 0.9.36
+    &mdash; Documentation by YARD 0.9.37
   
 </title>
 
@@ -618,7 +618,8 @@ aligner_set_additional_equalities(VALUE self, VALUE equalities)
 440
 441
 442
-443</pre>
+443
+444</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'ext/edlib/edlibext.c', line 374</span>
@@ -681,6 +682,7 @@ aligner_align(VALUE self, VALUE query, VALUE target)
 
 	char *ccigar = edlibAlignmentToCigar(result.alignment, result.alignmentLength, 1); // EDLIB_CIGAR_EXTENDED
 	cigar = rb_str_new2(ccigar);
+	free(ccigar);
 
 	VALUE hash = rb_hash_new();
 	rb_hash_aset(hash, ID2SYM(rb_intern(&quot;edit_distance&quot;)), edit_distance);
@@ -827,9 +829,9 @@ aligner_config_hash(VALUE self)
 </div>
 
       <div id="footer">
-  Generated on Sat Aug 17 05:11:55 2024 by
+  Generated on Thu Sep  5 00:24:22 2024 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
-  0.9.36 (ruby-3.3.4).
+  0.9.37 (ruby-3.3.5).
 </div>
 
     </div>

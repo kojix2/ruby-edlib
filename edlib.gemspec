@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email         = ['2xijok@gmail.com']
 
   spec.summary       = 'ruby-edlib is a wrapper for edlib.'
-  spec.description   = 'Lightweight, super fast C/C++ library for sequence alignment using edit (Levenshtein) distance. '
+  spec.description   = 'Lightweight, super fast C/C++ library for sequence alignment using edit (Levenshtein) distance.'
   spec.homepage      = 'https://github.com/kojix2/ruby-edlib'
   spec.license       = 'MIT'
   spec.required_ruby_version = '>= 2.7.0'

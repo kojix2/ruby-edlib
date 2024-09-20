@@ -10,16 +10,12 @@ namespace :edlib do
     url_edlib_h = URI("#{base_url}edlib/include/edlib.h")
     url_edlib_cpp = URI("#{base_url}edlib/src/edlib.cpp")
     outdir = 'ext/edlib'
-    URI.open(url_edlib_h) do |file|
-      File.open("#{outdir}/edlib.h", 'w') do |out|
-        out.write(file.read)
-      end
+    File.open("#{outdir}/edlib.h", 'w') do |out|
+      out.write(URI.parse(url_edlib_h).read)
     end
     warn "Saved #{outdir}/edlib.h"
-    URI.open(url_edlib_cpp) do |file|
-      File.open("#{outdir}/edlib.cpp", 'w') do |out|
-        out.write(file.read)
-      end
+    File.open("#{outdir}/edlib.cpp", 'w') do |out|
+      out.write(URI.parse(url_edlib_cpp).read)
     end
     warn "Saved #{outdir}/edlib.cpp"
   end

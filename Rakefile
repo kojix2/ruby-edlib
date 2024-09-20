@@ -7,17 +7,19 @@ namespace :edlib do
   task :update do
     require 'open-uri'
     base_url = 'https://raw.githubusercontent.com/Martinsos/edlib/master/'
-    url_edlib_h = URI("#{base_url}edlib/include/edlib.h")
-    url_edlib_cpp = URI("#{base_url}edlib/src/edlib.cpp")
+    urls = [
+      "#{base_url}edlib/include/edlib.h",
+      "#{base_url}edlib/src/edlib.cpp",
+      "#{base_url}LICENSE"
+    ]
     outdir = 'ext/edlib'
-    File.open("#{outdir}/edlib.h", 'w') do |out|
-      out.write(URI.parse(url_edlib_h).read)
+    urls.each do |url|
+      name = File.basename(url)
+      File.open("#{outdir}/#{name}", 'w') do |out|
+        out.write(URI.parse(url).read)
+      end
+      warn "Saved #{outdir}/#{name}"
     end
-    warn "Saved #{outdir}/edlib.h"
-    File.open("#{outdir}/edlib.cpp", 'w') do |out|
-      out.write(URI.parse(url_edlib_cpp).read)
-    end
-    warn "Saved #{outdir}/edlib.cpp"
   end
 end
 require 'rake/testtask'

@@ -318,7 +318,7 @@ set_additional_equalities(EdlibAlignConfig *config, EdlibEqualityPair *eqpairs, 
 	}
 
 	config->additionalEqualities = eqpairs;
-	config->additionalEqualitiesLength = len;
+	config->additionalEqualitiesLength = (int)len;
 
 	free(first_arr);
 	free(second_arr);
@@ -329,9 +329,14 @@ set_additional_equalities(EdlibAlignConfig *config, EdlibEqualityPair *eqpairs, 
 static VALUE
 aligner_set_additional_equalities(VALUE self, VALUE equalities)
 {
-	EdlibAlignConfig *config = aligner_get_config(self);
-	EdlibEqualityPair *eqpairs = aligner_get_equalityPairs(self);
-	return set_additional_equalities(config, eqpairs, equalities);
+	RbAlignConfig *aligner_config = NULL;
+	TypedData_Get_Struct(self, RbAlignConfig, &config_type, aligner_config);
+	EdlibAlignConfig *config = aligner_config->config;
+	EdlibEqualityPair *eqpairs = aligner_config->equalityPairs;
+	VALUE result = set_additional_equalities(config, eqpairs, equalities);
+	// Update the pointer in the struct
+	aligner_config->equalityPairs = (EdlibEqualityPair *)config->additionalEqualities;
+	return result;
 }
 
 static VALUE
@@ -382,9 +387,9 @@ aligner_align(VALUE self, VALUE query, VALUE target)
 
 	EdlibAlignResult result = edlibAlign(
 			StringValueCStr(query),
-			RSTRING_LEN(query),
+			(int)RSTRING_LEN(query),
 			StringValueCStr(target),
-			RSTRING_LEN(target),
+			(int)RSTRING_LEN(target),
 			*config);
 
 	if (result.status != 0)

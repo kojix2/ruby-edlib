@@ -106,9 +106,9 @@ class EdlibTest < Test::Unit::TestCase
   def test_additional_equalities_multiple_updates
     a = Edlib::Aligner.new
     # Update multiple times to ensure no memory leak
-    100.times do |i|
-      a.additional_equalities = [['A', 'B'], ['C', 'D']]
-      assert_equal [['A', 'B'], ['C', 'D']], a.additional_equalities
+    100.times do |_i|
+      a.additional_equalities = [%w[A B], %w[C D]]
+      assert_equal [%w[A B], %w[C D]], a.additional_equalities
       a.additional_equalities = []
       assert_equal [], a.additional_equalities
     end
@@ -130,10 +130,10 @@ class EdlibTest < Test::Unit::TestCase
   # Test alignment with equalities updates
   def test_align_with_updated_equalities
     a = Edlib::Aligner.new(mode: :hw, task: :path)
-    a.additional_equalities = [['R', 'A'], ['R', 'G']]
+    a.additional_equalities = [%w[R A], %w[R G]]
     r1 = a.align('ACTG', 'CACTRT')
     assert_equal 0, r1[:edit_distance]
-    
+
     # Update equalities and test again
     a.additional_equalities = []
     r2 = a.align('ACTG', 'CACTRT')

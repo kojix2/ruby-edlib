@@ -23,7 +23,7 @@ module Edlib
     private
 
     def align_nice(query, target)
-      result = align(query, target)
+      result = align_raw(query, target)
       result.merge(nice(result, query, target))
     end
 

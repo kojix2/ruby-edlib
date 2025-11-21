@@ -101,4 +101,42 @@ class EdlibTest < Test::Unit::TestCase
     assert_equal '-||||--||||.|||-||', r[:match_aligned]
     assert_equal '-AAGG--GGTCTCATATC', r[:target_aligned]
   end
+
+  # Test for memory leak prevention - multiple equality updates
+  def test_additional_equalities_multiple_updates
+    a = Edlib::Aligner.new
+    # Update multiple times to ensure no memory leak
+    100.times do |i|
+      a.additional_equalities = [['A', 'B'], ['C', 'D']]
+      assert_equal [['A', 'B'], ['C', 'D']], a.additional_equalities
+      a.additional_equalities = []
+      assert_equal [], a.additional_equalities
+    end
+  end
+
+  # Test that nice mode works correctly with align_raw being called
+  def test_align_nice_calls_raw_not_recursive
+    a = Edlib::Aligner.new(mode: :nw, task: :path)
+    # This should not cause infinite recursion
+    r1 = a.align('ACTG', 'ACTG', nice: true)
+    r2 = a.align('ACTG', 'ACTG', nice: false)
+    # Both should return valid results
+    assert_instance_of Hash, r1
+    assert_instance_of Hash, r2
+    assert r1.key?(:query_aligned)
+    refute r2.key?(:query_aligned)
+  end
+
+  # Test alignment with equalities updates
+  def test_align_with_updated_equalities
+    a = Edlib::Aligner.new(mode: :hw, task: :path)
+    a.additional_equalities = [['R', 'A'], ['R', 'G']]
+    r1 = a.align('ACTG', 'CACTRT')
+    assert_equal 0, r1[:edit_distance]
+    
+    # Update equalities and test again
+    a.additional_equalities = []
+    r2 = a.align('ACTG', 'CACTRT')
+    assert r2[:edit_distance] > 0
+  end
 end
